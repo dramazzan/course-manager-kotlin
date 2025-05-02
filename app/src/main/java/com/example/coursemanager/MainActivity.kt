@@ -54,7 +54,9 @@ class MainActivity : ComponentActivity() {
                             viewModel.setUser(user)
                             navController.navigate("home")
                         },
-                        onRegisterClick = { showRegistration = true }
+                        onRegisterClick = {
+                            navController.navigate("registration")
+                        }
                     )
                 }
                 composable("registration") {
@@ -64,19 +66,37 @@ class MainActivity : ComponentActivity() {
                             viewModel.setUser(user)
                             navController.navigate("home")
                         },
-                        onBack = { showRegistration = false }
+                        onBack = {
+                            navController.navigate("login")
+                        }
                     )
                 }
                 composable("home") {
                     when (currentUser?.role) {
-                        "ADMIN" -> AdminScreen(viewModel, onLogout = { currentUser = null })
-                        "TEACHER" -> TeacherScreen(viewModel, onLogout = { currentUser = null })
-                        "STUDENT" -> StudentScreen(viewModel, onLogout = { currentUser = null }, onChatClicked = {
+                        "ADMIN" -> AdminScreen(viewModel, onLogout = {
+                            currentUser = null
+                            navController.navigate("login") {
+                                popUpTo("home") { inclusive = true } // Удаляет экран из истории
+                            }
+                        })
+                        "TEACHER" -> TeacherScreen(viewModel, onLogout = {
+                            currentUser = null
+                            navController.navigate("login") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        })
+                        "STUDENT" -> StudentScreen(viewModel, onLogout = {
+                            currentUser = null
+                            navController.navigate("login") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        }, onChatClicked = {
                             navController.navigate("chat") // Переход в чат
                         })
                         else -> {}
                     }
                 }
+
                 composable("chat") {
                     // Передаем API ключ в экран чата
                     AssistantScreen(apiKey = "AIzaSyDU1KR3dRQVnWYMv5_7ylFMmt8gVywEYZ4") // Экран чата

@@ -31,9 +31,12 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                OutlinedButton(onClick = onLogout) {
+                OutlinedButton(onClick = {
+                    onLogout()
+                }) {
                     Text("Выйти")
                 }
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))
