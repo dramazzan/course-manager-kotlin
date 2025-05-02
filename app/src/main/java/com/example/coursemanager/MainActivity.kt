@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
 
                 composable("chat") {
                     // Передаем API ключ в экран чата
-                    AssistantScreen(apiKey = "AIzaSyDU1KR3dRQVnWYMv5_7ylFMmt8gVywEYZ4") // Экран чата
+                    AssistantScreen(apiKey = BuildConfig.GEMINI_API_KEY) // Экран чата
                 }
             }
         }
