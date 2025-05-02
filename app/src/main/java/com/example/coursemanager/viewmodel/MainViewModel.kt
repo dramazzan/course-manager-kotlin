@@ -9,9 +9,9 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
     var currentUser: User? = null
         private set
 
-    // Для студента: курсы, на которые он записан
+
     var courses = mutableStateOf<List<Course>>(listOf())
-    // Для отображения всех курсов (для возможности записи)
+
     var allCourses = mutableStateOf<List<Course>>(listOf())
     var materials = mutableStateOf<List<Material>>(listOf())
     var grades = mutableStateOf<List<Grade>>(listOf())
@@ -56,8 +56,7 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
             if (user.role == "STUDENT") {
                 grades.value = db.gradeDao().getGradesForStudent(user.id)
             } else {
-                // Для учителя можно загружать оценки всех студентов для курсов учителя
-                // Здесь можно загрузить оценки для всех курсов, если необходимо
+
             }
         }
     }
@@ -88,10 +87,8 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
     }
 
     fun assignGrade(courseId: Int, studentId: Int, gradeValue: Float) {
-        // Если оценка уже существует, @Insert(onConflict=REPLACE) обновит её
         val newGrade = Grade(studentId = studentId, courseId = courseId, grade = gradeValue)
         db.gradeDao().insert(newGrade)
-        // Перезагружаем оценки, если нужно (например, для студента или для общего списка)
         loadGrades()
     }
 
@@ -114,7 +111,6 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
         loadUsers()
     }
 
-    // Для учителя: получаем список студентов, записанных на конкретный курс
     fun loadStudentsForCourse(courseId: Int): List<User> {
         val enrollments = db.enrollmentDao().getEnrollmentsForCourse(courseId)
         return enrollments.mapNotNull { enrollment -> db.userDao().getUserById(enrollment.studentId) }

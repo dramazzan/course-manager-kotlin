@@ -10,7 +10,7 @@ data class User(
     var name: String,
     var email: String,
     var password: String,
-    var role: String  // "ADMIN", "TEACHER", "STUDENT"
+    var role: String
 )
 
 @Entity

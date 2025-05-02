@@ -25,11 +25,10 @@ class MainActivity : ComponentActivity() {
             AppDatabase::class.java,
             "course_db"
         )
-            .fallbackToDestructiveMigration() // Для тестирования
-            .allowMainThreadQueries() // НЕ для продакшена!
+            .fallbackToDestructiveMigration()
+            .allowMainThreadQueries()
             .build()
 
-        // Предварительное заполнение: создание администратора, если его нет
         if (database.userDao().getUserByEmail("admin@example.com") == null) {
             val admin = com.example.coursemanager.data.User(
                 name = "Администратор",

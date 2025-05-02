@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [User::class, Course::class, Enrollment::class, Material::class, Grade::class],
-    version = 6  // увеличили версию для миграции (если схема изменилась)
+    version = 6
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
