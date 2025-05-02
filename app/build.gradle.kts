@@ -16,6 +16,10 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val apiKey: String = project.findProperty("GOOGLE_API_KEY") as? String
+            ?: throw GradleException("GOOGLE_API_KEY is missing in gradle.properties")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$apiKey\"")
     }
 
     buildTypes {
@@ -36,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -45,6 +50,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
+    // Навигация
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
     // Зависимости для Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -52,6 +60,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+    // Material Icons (требуется для иконок в обновленном UI)
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
 
     // Зависимости Room (с использованием каталога версий)
     implementation(libs.androidx.room.runtime)
@@ -69,4 +81,17 @@ dependencies {
     // Debug зависимости для Compose
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Gemini API
+    implementation("com.google.ai.client.generativeai:generativeai:0.1.1")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // JSON Processing (для обработки ответов от API)
+    implementation("org.json:json:20240303")
+
+    // Coroutines (требуется для асинхронных операций)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Coil для загрузки изображений (опционально)
+    implementation("io.coil-kt:coil-compose:2.5.0")
 }

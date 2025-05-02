@@ -5,14 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.*
 import androidx.room.Room
 import com.example.coursemanager.data.AppDatabase
 import com.example.coursemanager.data.User
-import com.example.coursemanager.ui.theme.screens.AdminScreen
-import com.example.coursemanager.ui.theme.screens.LoginScreen
-import com.example.coursemanager.ui.theme.screens.RegistrationScreen
-import com.example.coursemanager.ui.theme.screens.StudentScreen
-import com.example.coursemanager.ui.theme.screens.TeacherScreen
+import com.example.coursemanager.ui.theme.screens.*
 import com.example.coursemanager.viewmodel.MainViewModel
 import com.example.coursemanager.viewmodel.MainViewModelFactory
 
@@ -41,33 +38,48 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val viewModel: MainViewModel = viewModel(factory = MainViewModelFactory(database))
+            val navController = rememberNavController()
+
             var currentUser by remember { mutableStateOf<User?>(null) }
             var showRegistration by remember { mutableStateOf(false) }
 
-            if (currentUser == null) {
-                if (showRegistration) {
-                    RegistrationScreen(
-                        onRegistrationSuccess = { user ->
-                            currentUser = user
-                            viewModel.setUser(user)
-                        },
-                        onBack = { showRegistration = false }
-                    )
-                } else {
+            // API key for Gemini (replace with your actual key)
+            val apiKey = "YOUR_GEMINI_API_KEY"
+
+            NavHost(navController = navController, startDestination = "login") {
+                composable("login") {
                     LoginScreen(
                         onLoginSuccess = { user ->
                             currentUser = user
                             viewModel.setUser(user)
+                            navController.navigate("home")
                         },
                         onRegisterClick = { showRegistration = true }
                     )
                 }
-            } else {
-                when (currentUser?.role) {
-                    "ADMIN" -> AdminScreen(viewModel, onLogout = { currentUser = null })
-                    "TEACHER" -> TeacherScreen(viewModel, onLogout = { currentUser = null })
-                    "STUDENT" -> StudentScreen(viewModel, onLogout = { currentUser = null })
-                    else -> {}
+                composable("registration") {
+                    RegistrationScreen(
+                        onRegistrationSuccess = { user ->
+                            currentUser = user
+                            viewModel.setUser(user)
+                            navController.navigate("home")
+                        },
+                        onBack = { showRegistration = false }
+                    )
+                }
+                composable("home") {
+                    when (currentUser?.role) {
+                        "ADMIN" -> AdminScreen(viewModel, onLogout = { currentUser = null })
+                        "TEACHER" -> TeacherScreen(viewModel, onLogout = { currentUser = null })
+                        "STUDENT" -> StudentScreen(viewModel, onLogout = { currentUser = null }, onChatClicked = {
+                            navController.navigate("chat") // Переход в чат
+                        })
+                        else -> {}
+                    }
+                }
+                composable("chat") {
+                    // Передаем API ключ в экран чата
+                    AssistantScreen(apiKey = "AIzaSyDU1KR3dRQVnWYMv5_7ylFMmt8gVywEYZ4") // Экран чата
                 }
             }
         }

@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.sp
 import com.example.coursemanager.viewmodel.MainViewModel
 
 @Composable
-fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit) {
+fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked: () -> Unit) {
     LaunchedEffect(Unit) {
         viewModel.loadAllCourses()
         viewModel.loadGrades()
@@ -104,6 +104,18 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit) {
                         }
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Кнопка для перехода в чат
+            Button(
+                onClick = onChatClicked,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Text("Перейти в чат")
             }
         }
     }
