@@ -9,6 +9,7 @@ import androidx.navigation.compose.*
 import androidx.room.Room
 import com.example.coursemanager.data.AppDatabase
 import com.example.coursemanager.data.User
+import com.example.coursemanager.ui.theme.CourseManagerTheme
 import com.example.coursemanager.ui.theme.screens.*
 import com.example.coursemanager.viewmodel.MainViewModel
 import com.example.coursemanager.viewmodel.MainViewModelFactory
@@ -35,71 +36,78 @@ class MainActivity : ComponentActivity() {
             )
             database.userDao().insert(admin)
         }
-
         setContent {
-            val viewModel: MainViewModel = viewModel(factory = MainViewModelFactory(database))
-            val navController = rememberNavController()
+            CourseManagerTheme {
+                val viewModel: MainViewModel = viewModel(factory = MainViewModelFactory(database))
+                val navController = rememberNavController()
 
-            var currentUser by remember { mutableStateOf<User?>(null) }
-            var showRegistration by remember { mutableStateOf(false) }
+                var currentUser by remember { mutableStateOf<User?>(null) }
+                var showRegistration by remember { mutableStateOf(false) }
 
-            // API key for Gemini (replace with your actual key)
-            val apiKey = "YOUR_GEMINI_API_KEY"
+                val apiKey = "YOUR_GEMINI_API_KEY"
 
-            NavHost(navController = navController, startDestination = "login") {
-                composable("login") {
-                    LoginScreen(
-                        onLoginSuccess = { user ->
-                            currentUser = user
-                            viewModel.setUser(user)
-                            navController.navigate("home")
-                        },
-                        onRegisterClick = {
-                            navController.navigate("registration")
-                        }
-                    )
-                }
-                composable("registration") {
-                    RegistrationScreen(
-                        onRegistrationSuccess = { user ->
-                            currentUser = user
-                            viewModel.setUser(user)
-                            navController.navigate("home")
-                        },
-                        onBack = {
-                            navController.navigate("login")
-                        }
-                    )
-                }
-                composable("home") {
-                    when (currentUser?.role) {
-                        "ADMIN" -> AdminScreen(viewModel, onLogout = {
-                            currentUser = null
-                            navController.navigate("login") {
-                                popUpTo("home") { inclusive = true } // Удаляет экран из истории
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("login") {
+                        LoginScreen(
+                            onLoginSuccess = { user ->
+                                currentUser = user
+                                viewModel.setUser(user)
+                                navController.navigate("home")
+                            },
+                            onRegisterClick = {
+                                navController.navigate("registration")
                             }
-                        })
-                        "TEACHER" -> TeacherScreen(viewModel, onLogout = {
-                            currentUser = null
-                            navController.navigate("login") {
-                                popUpTo("home") { inclusive = true }
-                            }
-                        })
-                        "STUDENT" -> StudentScreen(viewModel, onLogout = {
-                            currentUser = null
-                            navController.navigate("login") {
-                                popUpTo("home") { inclusive = true }
-                            }
-                        }, onChatClicked = {
-                            navController.navigate("chat") // Переход в чат
-                        })
-                        else -> {}
+                        )
                     }
-                }
+                    composable("registration") {
+                        RegistrationScreen(
+                            onRegistrationSuccess = { user ->
+                                currentUser = user
+                                viewModel.setUser(user)
+                                navController.navigate("home")
+                            },
+                            onBack = {
+                                navController.navigate("login")
+                            }
+                        )
+                    }
+                    composable("home") {
+                        when (currentUser?.role) {
+                            "ADMIN" -> AdminScreen(viewModel, onLogout = {
+                                currentUser = null
+                                navController.navigate("login") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            })
 
-                composable("chat") {
-                    // Передаем API ключ в экран чата
-                    AssistantScreen(apiKey = BuildConfig.GEMINI_API_KEY) // Экран чата
+                            "TEACHER" -> TeacherScreen(viewModel, onLogout = {
+                                currentUser = null
+                                navController.navigate("login") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            })
+
+                            "STUDENT" -> StudentScreen(viewModel, onLogout = {
+                                currentUser = null
+                                navController.navigate("login") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            }, onChatClicked = {
+                                navController.navigate("chat")
+                            })
+
+                            else -> {}
+                        }
+                    }
+
+                    composable("chat") {
+                        AssistantScreen(apiKey = BuildConfig.GEMINI_API_KEY , onBackPressed ={
+                            navController.navigate("home"){
+                                popUpTo("chat"){inclusive = true}
+                            }
+
+                        })
+                    }
                 }
             }
         }

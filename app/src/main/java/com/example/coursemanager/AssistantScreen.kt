@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,7 +36,7 @@ data class ChatMessage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssistantScreen(apiKey: String) {
+fun AssistantScreen(apiKey: String, onBackPressed: () -> Unit) {
     var userInput by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var chatMessages by remember { mutableStateOf(listOf<ChatMessage>()) }
@@ -58,6 +59,7 @@ fun AssistantScreen(apiKey: String) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Top app bar with back button
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -75,6 +77,23 @@ fun AssistantScreen(apiKey: String) {
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Back button
+                    IconButton(
+                        onClick = onBackPressed,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(primaryColor)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Назад",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
                     Box(
                         modifier = Modifier
                             .size(40.dp)
