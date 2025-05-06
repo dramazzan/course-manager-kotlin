@@ -94,4 +94,6 @@ dependencies {
 
     // Coil для загрузки изображений (опционально)
     implementation("io.coil-kt:coil-compose:2.5.0")
+
+    implementation( "com.google.accompanist:accompanist-placeholder-material:0.28.0")
 }

@@ -3,8 +3,11 @@ package com.example.coursemanager.ui.theme.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,8 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.room.Room
 import com.example.coursemanager.data.AppDatabase
 import com.example.coursemanager.data.User
+import com.example.coursemanager.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,26 +59,69 @@ fun LoginScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        AppColors.backgroundTop,
+                        AppColors.backgroundBottom
                     )
                 )
             )
     ) {
+        // App logo or branding at the top
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 60.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    AppColors.primary,
+                                    AppColors.secondary
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "CM",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Course Manager",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = AppColors.textPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
         Card(
             modifier = Modifier
                 .padding(24.dp)
                 .fillMaxWidth()
                 .align(Alignment.Center),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(28.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = AppColors.cardBackground
             )
         ) {
             Column(
                 modifier = Modifier
-                    .padding(24.dp)
+                    .padding(horizontal = 24.dp, vertical = 32.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -83,15 +130,15 @@ fun LoginScreen(
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    color = MaterialTheme.colorScheme.primary
+                    color = AppColors.textPrimary
                 )
 
                 Text(
                     text = "Войдите в свой аккаунт",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = AppColors.textSecondary,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
+                    modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
                 )
 
                 // Email field
@@ -107,7 +154,7 @@ fun LoginScreen(
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = "Email",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = AppColors.primary
                         )
                     },
                     singleLine = true,
@@ -119,15 +166,17 @@ fun LoginScreen(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
+                        focusedBorderColor = AppColors.primary,
+                        unfocusedBorderColor = AppColors.fieldBorder,
+                        focusedLabelColor = AppColors.primary,
+                        unfocusedLabelColor = AppColors.textSecondary,
+                        cursorColor = AppColors.primary
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Password field
                 OutlinedTextField(
@@ -142,19 +191,22 @@ fun LoginScreen(
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Password",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = AppColors.primary
                         )
                     },
                     trailingIcon = {
                         IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                             Icon(
-                                imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                imageVector = if (isPasswordVisible)
+                                    Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                                contentDescription = if (isPasswordVisible)
+                                    "Hide password" else "Show password",
+                                tint = AppColors.iconTint
                             )
                         }
                     },
-                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    visualTransformation = if (isPasswordVisible)
+                        VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -163,8 +215,8 @@ fun LoginScreen(
                     keyboardActions = KeyboardActions(
                         onDone = {
                             focusManager.clearFocus()
-                            // Trigger login
                             if (email.isNotEmpty() && password.isNotEmpty()) {
+                                isLoading = true
                                 performLogin(email, password, context, onLoginSuccess) { error ->
                                     errorMessage = error
                                     isLoading = false
@@ -173,11 +225,13 @@ fun LoginScreen(
                         }
                     ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
+                        focusedBorderColor = AppColors.primary,
+                        unfocusedBorderColor = AppColors.fieldBorder,
+                        focusedLabelColor = AppColors.primary,
+                        unfocusedLabelColor = AppColors.textSecondary,
+                        cursorColor = AppColors.primary
                     )
                 )
 
@@ -188,8 +242,9 @@ fun LoginScreen(
                     TextButton(onClick = { /* Handle forgot password */ }) {
                         Text(
                             "Забыли пароль?",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium
+                            color = AppColors.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
@@ -199,14 +254,14 @@ fun LoginScreen(
                 // Error message
                 AnimatedVisibility(
                     visible = errorMessage.isNotEmpty(),
-                    enter = fadeIn(),
-                    exit = fadeOut()
+                    enter = fadeIn() + slideInVertically(),
+                    exit = fadeOut() + slideOutVertically()
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.errorContainer)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(AppColors.errorContainer)
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start
@@ -214,12 +269,12 @@ fun LoginScreen(
                         Icon(
                             imageVector = Icons.Default.Error,
                             contentDescription = "Error",
-                            tint = MaterialTheme.colorScheme.error
+                            tint = AppColors.error
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = errorMessage,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            color = AppColors.onErrorContainer,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -242,27 +297,29 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = AppColors.primary,
+                        disabledContainerColor = AppColors.primary.copy(alpha = 0.6f)
                     ),
                     enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty()
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = Color.White,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Text(
                             "Войти",
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Register link
                 Row(
@@ -273,7 +330,7 @@ fun LoginScreen(
                     Text(
                         "Нет аккаунта?",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = AppColors.textSecondary
                     )
                     TextButton(onClick = onRegisterClick) {
                         Text(
@@ -281,7 +338,7 @@ fun LoginScreen(
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),
-                            color = MaterialTheme.colorScheme.primary
+                            color = AppColors.primary
                         )
                     }
                 }

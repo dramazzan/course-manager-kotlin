@@ -17,6 +17,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -24,10 +25,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.coursemanager.data.Course
 import com.example.coursemanager.viewmodel.MainViewModel
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,15 +56,15 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = AppColors.primary,
+                    titleContentColor = Color.White
                 ),
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Rounded.School,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = Color.White,
                             modifier = Modifier.size(28.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -79,12 +84,12 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                         modifier = Modifier
                             .padding(end = 8.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                            .background(Color.White.copy(alpha = 0.2f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.ExitToApp,
                             contentDescription = "Выйти",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = Color.White
                         )
                     }
                 }
@@ -93,8 +98,8 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onChatClicked,
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                shape = CircleShape,
+                containerColor = AppColors.secondary,
+                shape = RoundedCornerShape(28.dp),
                 elevation = FloatingActionButtonDefaults.elevation(
                     defaultElevation = 6.dp,
                     pressedElevation = 8.dp
@@ -107,7 +112,7 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                     Icon(
                         imageVector = Icons.Default.ChatBubbleOutline,
                         contentDescription = "Перейти в чат",
-                        tint = MaterialTheme.colorScheme.onTertiary
+                        tint = Color.White
                     )
                     AnimatedVisibility(
                         visible = true,
@@ -118,8 +123,9 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 "Чат",
-                                color = MaterialTheme.colorScheme.onTertiary,
-                                style = MaterialTheme.typography.labelLarge
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
@@ -142,8 +148,8 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.background,
-                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                AppColors.backgroundTop,
+                                AppColors.backgroundBottom
                             )
                         )
                     )
@@ -151,14 +157,14 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                 // Custom Tab Row
                 TabRow(
                     selectedTabIndex = selectedTab,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = Color.White,
+                    contentColor = AppColors.primary,
                     divider = {
                         Spacer(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(4.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .background(Color.White)
                         )
                     },
                     indicator = { tabPositions ->
@@ -169,8 +175,8 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                                 .background(
                                     brush = Brush.horizontalGradient(
                                         colors = listOf(
-                                            MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.tertiary
+                                            AppColors.primary,
+                                            AppColors.secondary
                                         )
                                     ),
                                     shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
@@ -188,12 +194,12 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                                     text = title,
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (selected) AppColors.primary else AppColors.textSecondary
                                 )
                             },
                             icon = {
                                 val icon = if (index == 0) Icons.Outlined.MenuBook else Icons.Default.School
-                                val tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                val tint = if (selected) AppColors.primary else AppColors.textSecondary
 
                                 Icon(
                                     imageVector = icon,
@@ -251,7 +257,7 @@ fun AvailableCoursesSection(availableCourses: List<Course>, viewModel: MainViewM
             icon = Icons.Outlined.MenuBook,
             title = "Доступные курсы",
             count = availableCourses.size,
-            color = MaterialTheme.colorScheme.tertiary
+            color = AppColors.secondary
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -287,7 +293,7 @@ fun EnrolledCoursesSection(viewModel: MainViewModel, onCourseSelected: (Int) -> 
             icon = Icons.Default.School,
             title = "Мои курсы",
             count = viewModel.courses.value.size,
-            color = MaterialTheme.colorScheme.primary
+            color = AppColors.primary
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -320,14 +326,14 @@ fun CourseStatusCard(icon: ImageVector, title: String, count: Int, color: Color)
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(16.dp),
+                elevation = 8.dp,
+                shape = RoundedCornerShape(24.dp),
                 spotColor = color.copy(alpha = 0.1f)
             ),
         colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.15f)
+            containerColor = Color.White
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(24.dp)
     ) {
         Row(
             modifier = Modifier
@@ -337,15 +343,22 @@ fun CourseStatusCard(icon: ImageVector, title: String, count: Int, color: Color)
         ) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(color.copy(alpha = 0.2f)),
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                color,
+                                color.copy(alpha = 0.7f)
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = color,
+                    tint = Color.White,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -357,7 +370,7 @@ fun CourseStatusCard(icon: ImageVector, title: String, count: Int, color: Color)
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = AppColors.textPrimary
                 )
 
                 AnimatedContent(
@@ -370,7 +383,7 @@ fun CourseStatusCard(icon: ImageVector, title: String, count: Int, color: Color)
                     Text(
                         text = "Количество: $targetCount",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = AppColors.textSecondary
                     )
                 }
             }
@@ -379,16 +392,23 @@ fun CourseStatusCard(icon: ImageVector, title: String, count: Int, color: Color)
 
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
-                    .background(color.copy(alpha = 0.1f)),
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                color,
+                                color.copy(alpha = 0.7f)
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = count.toString(),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = color
+                    color = Color.White
                 )
             }
         }
@@ -407,8 +427,13 @@ fun EmptyStateMessage(message: String) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(24.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color.White)
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(28.dp),
+                    spotColor = AppColors.primary.copy(alpha = 0.1f)
+                )
                 .padding(32.dp)
         ) {
             val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -428,7 +453,7 @@ fun EmptyStateMessage(message: String) {
                 modifier = Modifier
                     .size(72.dp)
                     .scale(scale),
-                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
+                tint = AppColors.textSecondary.copy(alpha = 0.7f)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -436,7 +461,7 @@ fun EmptyStateMessage(message: String) {
             Text(
                 text = message,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = AppColors.textPrimary,
                 fontWeight = FontWeight.Medium
             )
 
@@ -445,8 +470,8 @@ fun EmptyStateMessage(message: String) {
             Text(
                 text = "Проверьте позже или обратитесь к администратору",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                color = AppColors.textSecondary,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -481,18 +506,18 @@ fun AvailableCourseItem(course: Course, onEnroll: () -> Unit, animationDelay: In
                     )
                 ),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = Color.White
             ),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = if (isHovered) 6.dp else 2.dp
+                defaultElevation = if (isHovered) 8.dp else 4.dp
             ),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(24.dp),
             onClick = { isHovered = !isHovered }
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(if (isHovered) 20.dp else 16.dp)
+                    .padding(if (isHovered) 24.dp else 20.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -502,13 +527,13 @@ fun AvailableCourseItem(course: Course, onEnroll: () -> Unit, animationDelay: In
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .size(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(
                                     brush = Brush.linearGradient(
                                         colors = listOf(
-                                            MaterialTheme.colorScheme.tertiaryContainer,
-                                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f)
+                                            AppColors.secondary,
+                                            AppColors.secondary.copy(alpha = 0.7f)
                                         )
                                     )
                                 ),
@@ -517,8 +542,8 @@ fun AvailableCourseItem(course: Course, onEnroll: () -> Unit, animationDelay: In
                             Icon(
                                 imageVector = Icons.Outlined.MenuBook,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                modifier = Modifier.size(24.dp)
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
                             )
                         }
 
@@ -528,12 +553,13 @@ fun AvailableCourseItem(course: Course, onEnroll: () -> Unit, animationDelay: In
                             Text(
                                 text = course.title,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.Bold,
+                                color = AppColors.textPrimary
                             )
                             Text(
                                 text = "ID: ${course.id}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.outline
+                                color = AppColors.textSecondary
                             )
                         }
                     }
@@ -544,23 +570,23 @@ fun AvailableCourseItem(course: Course, onEnroll: () -> Unit, animationDelay: In
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    Column(modifier = Modifier.padding(top = 16.dp)) {
+                    Column(modifier = Modifier.padding(top = 20.dp)) {
                         Text(
                             text = "Описание курса",
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = AppColors.primary,
                             fontWeight = FontWeight.Medium
                         )
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             text = "Этот курс предоставляет студентам возможность изучить основные концепции и практики в данной области.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = AppColors.textSecondary
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
 
@@ -571,15 +597,16 @@ fun AvailableCourseItem(course: Course, onEnroll: () -> Unit, animationDelay: In
                     FilledTonalButton(
                         onClick = onEnroll,
                         colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary,
-                            contentColor = MaterialTheme.colorScheme.onTertiary
+                            containerColor = AppColors.secondary,
+                            contentColor = Color.White
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.height(48.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.PersonAdd,
                             contentDescription = "Enroll",
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -619,15 +646,15 @@ fun EnrolledCourseItem(
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = Color.White
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-            shape = RoundedCornerShape(16.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(24.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(24.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -635,13 +662,13 @@ fun EnrolledCourseItem(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
                             .background(
                                 brush = Brush.linearGradient(
                                     colors = listOf(
-                                        MaterialTheme.colorScheme.primaryContainer,
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                        AppColors.primary,
+                                        AppColors.primary.copy(alpha = 0.7f)
                                     )
                                 )
                             ),
@@ -650,8 +677,8 @@ fun EnrolledCourseItem(
                         Icon(
                             imageVector = Icons.Rounded.School,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(24.dp)
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
                         )
                     }
 
@@ -661,12 +688,13 @@ fun EnrolledCourseItem(
                         Text(
                             text = course.title,
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold,
+                            color = AppColors.textPrimary
                         )
                         Text(
                             text = "ID курса: ${course.id}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outline
+                            color = AppColors.textSecondary
                         )
                     }
 
@@ -674,45 +702,50 @@ fun EnrolledCourseItem(
                     val progress = grade?.div(5f) ?: 0f
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(56.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(
+                                if (grade != null)
+                                    AppColors.primary.copy(alpha = 0.1f)
+                                else
+                                    AppColors.textSecondary.copy(alpha = 0.1f)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
                             progress = { progress },
-                            modifier = Modifier.size(48.dp),
+                            modifier = Modifier.size(56.dp),
                             strokeWidth = 4.dp,
-                            color = if (grade != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            color = if (grade != null) AppColors.primary else AppColors.textSecondary
                         )
 
                         Text(
                             text = grade?.toString() ?: "-",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (grade != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            color = if (grade != null) AppColors.primary else AppColors.textSecondary
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 val gradientColors = if (grade != null) {
                     listOf(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                        AppColors.primary.copy(alpha = 0.1f),
+                        AppColors.primary.copy(alpha = 0.05f)
                     )
                 } else {
                     listOf(
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.05f)
+                        AppColors.textSecondary.copy(alpha = 0.1f),
+                        AppColors.textSecondary.copy(alpha = 0.05f)
                     )
                 }
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .background(brush = Brush.horizontalGradient(gradientColors))
                         .padding(16.dp)
                 ) {
@@ -721,9 +754,9 @@ fun EnrolledCourseItem(
                             imageVector = if (grade != null) Icons.Filled.Star else Icons.Outlined.StarOutline,
                             contentDescription = null,
                             tint = if (grade != null)
-                                MaterialTheme.colorScheme.primary
+                                AppColors.primary
                             else
-                                MaterialTheme.colorScheme.outline,
+                                AppColors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
 
@@ -733,7 +766,7 @@ fun EnrolledCourseItem(
                             Text(
                                 text = if (grade != null) "Текущая оценка" else "Статус оценки",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = AppColors.textSecondary
                             )
 
                             Text(
@@ -741,9 +774,9 @@ fun EnrolledCourseItem(
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (grade != null) FontWeight.Medium else FontWeight.Normal,
                                 color = if (grade != null)
-                                    MaterialTheme.colorScheme.primary
+                                    AppColors.primary
                                 else
-                                    MaterialTheme.colorScheme.outline
+                                    AppColors.textSecondary
                             )
                         }
                     }
@@ -753,18 +786,19 @@ fun EnrolledCourseItem(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp),
+                        .padding(top = 20.dp),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
                         onClick = { /* View details action */ },
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.height(48.dp),
                         border = ButtonDefaults.outlinedButtonBorder.copy(
                             brush = Brush.horizontalGradient(
                                 listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                                    MaterialTheme.colorScheme.primary
+                                    AppColors.primary.copy(alpha = 0.5f),
+                                    AppColors.primary
                                 )
                             )
                         )
@@ -772,29 +806,38 @@ fun EnrolledCourseItem(
                         Icon(
                             imageVector = Icons.Outlined.Visibility,
                             contentDescription = "View details",
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Подробнее")
+                        Text(
+                            "Подробнее",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     FilledTonalButton(
                         onClick = onViewDetails,
                         colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+                            containerColor = AppColors.primary,
+                            contentColor = Color.White
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.height(48.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.PlayArrow,
                             contentDescription = "Start learning",
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Начать")
+                        Text(
+                            "Начать",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
@@ -816,7 +859,15 @@ fun CourseDetails(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        AppColors.backgroundTop,
+                        AppColors.backgroundBottom
+                    )
+                )
+            )
+            .padding(24.dp)
     ) {
         // Back button and header
         Row(
@@ -826,13 +877,15 @@ fun CourseDetails(
             IconButton(
                 onClick = onBack,
                 modifier = Modifier
+                    .size(48.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .background(Color.White)
+                    .shadow(4.dp, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Назад",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = AppColors.primary
                 )
             }
 
@@ -841,7 +894,8 @@ fun CourseDetails(
             Text(
                 text = "Детали курса",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = AppColors.textPrimary
             )
         }
 
@@ -853,7 +907,8 @@ fun CourseDetails(
             Text(
                 text = course.title,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = AppColors.textPrimary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -861,25 +916,34 @@ fun CourseDetails(
             Text(
                 text = "ID курса: ${course.id}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                color = AppColors.textSecondary
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         // Materials header
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.Book,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(AppColors.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Book,
+                    contentDescription = null,
+                    tint = AppColors.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = "Учебные материалы",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold,
+                color = AppColors.textPrimary
             )
         }
 
@@ -890,39 +954,45 @@ fun CourseDetails(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .shadow(4.dp, RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Материалы отсутствуют",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.outline
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = null,
+                        tint = AppColors.textSecondary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Материалы отсутствуют",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AppColors.textSecondary
+                    )
+                }
             }
         } else {
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
             ) {
                 itemsIndexed(viewModel.materials.value) { index, material ->
-                    val colors = listOf(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
-                        MaterialTheme.colorScheme.surface
-                    )
-
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(brush = Brush.verticalGradient(colors))
-                                .padding(16.dp)
+                                .padding(20.dp)
                         ) {
                             Column {
                                 Row(
@@ -930,29 +1000,46 @@ fun CourseDetails(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = "Материал ${index + 1}",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .clip(CircleShape)
+                                                .background(AppColors.primary),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "${index + 1}",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Text(
+                                            text = "Материал ${index + 1}",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = AppColors.textPrimary
+                                        )
+                                    }
                                 }
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
 
                                 Text(
                                     text = material.content,
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = AppColors.textSecondary
                                 )
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Action buttons at the bottom
         Row(
@@ -961,17 +1048,45 @@ fun CourseDetails(
         ) {
             OutlinedButton(
                 onClick = onBack,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.height(48.dp),
+                border = ButtonDefaults.outlinedButtonBorder.copy(
+                    brush = Brush.horizontalGradient(
+                        listOf(
+                            AppColors.primary.copy(alpha = 0.5f),
+                            AppColors.primary
+                        )
+                    )
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Назад")
+                Text(
+                    "Назад",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
 }
 
+// Color palette object to be added to your Color.kt file
+object AppColors {
+    val primary = Color(0xFF6C63FF)
+    val secondary = Color(0xFF9C8FFF)
+    val backgroundTop = Color(0xFFF8F9FF)
+    val backgroundBottom = Color(0xFFEEF1FF)
+    val cardBackground = Color(0xFFFFFFFF)
+    val textPrimary = Color(0xFF2B2B2B)
+    val textSecondary = Color(0xFF757575)
+    val fieldBorder = Color(0xFFE0E0E0)
+    val iconTint = Color(0xFF9E9E9E)
+    val errorContainer = Color(0xFFFFEBEE)
+    val error = Color(0xFFE53935)
+    val onErrorContainer = Color(0xFFB71C1C)
+}

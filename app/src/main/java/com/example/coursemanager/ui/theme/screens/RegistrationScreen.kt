@@ -3,6 +3,8 @@ package com.example.coursemanager.ui.theme.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,6 +14,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.room.Room
 import com.example.coursemanager.data.AppDatabase
 import com.example.coursemanager.data.User
+import com.example.coursemanager.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,8 +95,8 @@ fun RegistrationScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        AppColors.backgroundTop,
+                        AppColors.backgroundBottom
                     )
                 )
             )
@@ -103,29 +109,72 @@ fun RegistrationScreen(
                 .align(Alignment.TopStart)
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f))
+                .background(AppColors.primary.copy(alpha = 0.1f))
         ) {
             Icon(
                 imageVector = Icons.Outlined.ArrowBack,
                 contentDescription = "Назад",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                tint = AppColors.primary
             )
+        }
+
+        // App logo or branding at the top
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 60.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    AppColors.primary,
+                                    AppColors.secondary
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "CM",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Course Manager",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = AppColors.textPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         Card(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(horizontal = 24.dp, vertical = 32.dp)
                 .fillMaxWidth()
                 .align(Alignment.Center),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(28.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = AppColors.cardBackground
             )
         ) {
             Column(
                 modifier = Modifier
-                    .padding(24.dp)
+                    .padding(horizontal = 24.dp, vertical = 32.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -134,15 +183,15 @@ fun RegistrationScreen(
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    color = MaterialTheme.colorScheme.primary
+                    color = AppColors.textPrimary
                 )
 
                 Text(
                     text = "Заполните данные для регистрации",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = AppColors.textSecondary,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
+                    modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
                 )
 
                 // Name field
@@ -158,7 +207,7 @@ fun RegistrationScreen(
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Name",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = AppColors.primary
                         )
                     },
                     singleLine = true,
@@ -169,15 +218,17 @@ fun RegistrationScreen(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
+                        focusedBorderColor = AppColors.primary,
+                        unfocusedBorderColor = AppColors.fieldBorder,
+                        focusedLabelColor = AppColors.primary,
+                        unfocusedLabelColor = AppColors.textSecondary,
+                        cursorColor = AppColors.primary
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Email field
                 OutlinedTextField(
@@ -192,7 +243,7 @@ fun RegistrationScreen(
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = "Email",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = AppColors.primary
                         )
                     },
                     singleLine = true,
@@ -204,15 +255,17 @@ fun RegistrationScreen(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
+                        focusedBorderColor = AppColors.primary,
+                        unfocusedBorderColor = AppColors.fieldBorder,
+                        focusedLabelColor = AppColors.primary,
+                        unfocusedLabelColor = AppColors.textSecondary,
+                        cursorColor = AppColors.primary
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Password field
                 OutlinedTextField(
@@ -227,19 +280,22 @@ fun RegistrationScreen(
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Password",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = AppColors.primary
                         )
                     },
                     trailingIcon = {
                         IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                             Icon(
-                                imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                imageVector = if (isPasswordVisible)
+                                    Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                                contentDescription = if (isPasswordVisible)
+                                    "Hide password" else "Show password",
+                                tint = AppColors.iconTint
                             )
                         }
                     },
-                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    visualTransformation = if (isPasswordVisible)
+                        VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -249,15 +305,17 @@ fun RegistrationScreen(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
+                        focusedBorderColor = AppColors.primary,
+                        unfocusedBorderColor = AppColors.fieldBorder,
+                        focusedLabelColor = AppColors.primary,
+                        unfocusedLabelColor = AppColors.textSecondary,
+                        cursorColor = AppColors.primary
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Confirm Password field
                 OutlinedTextField(
@@ -272,19 +330,22 @@ fun RegistrationScreen(
                         Icon(
                             imageVector = Icons.Default.LockReset,
                             contentDescription = "Confirm Password",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = AppColors.primary
                         )
                     },
                     trailingIcon = {
                         IconButton(onClick = { isConfirmPasswordVisible = !isConfirmPasswordVisible }) {
                             Icon(
-                                imageVector = if (isConfirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (isConfirmPasswordVisible) "Hide password" else "Show password",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                imageVector = if (isConfirmPasswordVisible)
+                                    Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                                contentDescription = if (isConfirmPasswordVisible)
+                                    "Hide password" else "Show password",
+                                tint = AppColors.iconTint
                             )
                         }
                     },
-                    visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    visualTransformation = if (isConfirmPasswordVisible)
+                        VisualTransformation.None else PasswordVisualTransformation(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -294,33 +355,36 @@ fun RegistrationScreen(
                         onDone = {
                             focusManager.clearFocus()
                             if (!isLoading) {
+                                isLoading = true
                                 registerUser()
                             }
                         }
                     ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
+                        focusedBorderColor = AppColors.primary,
+                        unfocusedBorderColor = AppColors.fieldBorder,
+                        focusedLabelColor = AppColors.primary,
+                        unfocusedLabelColor = AppColors.textSecondary,
+                        cursorColor = AppColors.primary
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Error message
                 AnimatedVisibility(
                     visible = errorMessage != null,
-                    enter = fadeIn(),
-                    exit = fadeOut()
+                    enter = fadeIn() + slideInVertically(),
+                    exit = fadeOut() + slideOutVertically()
                 ) {
                     errorMessage?.let { message ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.errorContainer)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(AppColors.errorContainer)
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Start
@@ -328,12 +392,12 @@ fun RegistrationScreen(
                             Icon(
                                 imageVector = Icons.Default.Error,
                                 contentDescription = "Error",
-                                tint = MaterialTheme.colorScheme.error
+                                tint = AppColors.error
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = message,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                color = AppColors.onErrorContainer,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -352,9 +416,10 @@ fun RegistrationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = AppColors.primary,
+                        disabledContainerColor = AppColors.primary.copy(alpha = 0.6f)
                     ),
                     enabled = !isLoading && name.isNotEmpty() && email.isNotEmpty() &&
                             password.isNotEmpty() && confirmPassword.isNotEmpty()
@@ -362,13 +427,14 @@ fun RegistrationScreen(
                     if (isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = Color.White,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Text(
                             "Зарегистрироваться",
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -387,23 +453,20 @@ fun RegistrationScreen(
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = AppColors.primary,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             "Вернуться к входу",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            fontWeight = FontWeight.Medium,
+                            color = AppColors.primary
                         )
                     }
                 }
             }
         }
     }
-
-    /**
-     * Функция для проверки корректности заполнения полей и регистрации пользователя.
-     */
-
 }
+
