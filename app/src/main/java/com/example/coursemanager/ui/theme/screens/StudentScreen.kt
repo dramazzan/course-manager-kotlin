@@ -44,6 +44,9 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Доступные курсы", "Мои курсы")
 
+    // State for course details navigation
+    var selectedCourseId by remember { mutableStateOf<Int?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -124,99 +127,113 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        // Show course details if a course is selected, otherwise show the main screen
+        if (selectedCourseId != null) {
+            CourseDetails(
+                viewModel = viewModel,
+                courseId = selectedCourseId!!,
+                onBack = { selectedCourseId = null }
+            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                            )
                         )
                     )
-                )
-        ) {
-            // Custom Tab Row
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.primary,
-                divider = {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                    )
-                },
-                indicator = { tabPositions ->
-                    Box(
-                        Modifier
-                            .tabIndicatorOffset(tabPositions[selectedTab])
-                            .height(4.dp)
-                            .background(
-                                brush = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary,
-                                        MaterialTheme.colorScheme.tertiary
-                                    )
-                                ),
-                                shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
-                            )
-                    )
-                }
             ) {
-                tabs.forEachIndexed { index, title ->
-                    val selected = selectedTab == index
-                    Tab(
-                        selected = selected,
-                        onClick = { selectedTab = index },
-                        text = {
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
-                        icon = {
-                            val icon = if (index == 0) Icons.Outlined.MenuBook else Icons.Default.School
-                            val tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = title,
-                                tint = tint
-                            )
-                        },
-                        modifier = Modifier.padding(vertical = 12.dp)
-                    )
-                }
-            }
-
-            // Content area with animated transitions
-            Box(modifier = Modifier.fillMaxSize()) {
-                this@Column.AnimatedVisibility(
-                    visible = selectedTab == 0,
-                    enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    )),
-                    exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
+                // Custom Tab Row
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    divider = {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        )
+                    },
+                    indicator = { tabPositions ->
+                        Box(
+                            Modifier
+                                .tabIndicatorOffset(tabPositions[selectedTab])
+                                .height(4.dp)
+                                .background(
+                                    brush = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.tertiary
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
+                                )
+                        )
+                    }
                 ) {
-                    AvailableCoursesSection(availableCourses, viewModel)
+                    tabs.forEachIndexed { index, title ->
+                        val selected = selectedTab == index
+                        Tab(
+                            selected = selected,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            icon = {
+                                val icon = if (index == 0) Icons.Outlined.MenuBook else Icons.Default.School
+                                val tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = title,
+                                    tint = tint
+                                )
+                            },
+                            modifier = Modifier.padding(vertical = 12.dp)
+                        )
+                    }
                 }
 
-                this@Column.AnimatedVisibility(
-                    visible = selectedTab == 1,
-                    enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    )),
-                    exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
-                ) {
-                    EnrolledCoursesSection(viewModel)
+                // Content area with animated transitions
+                Box(modifier = Modifier.fillMaxSize()) {
+                    this@Column.AnimatedVisibility(
+                        visible = selectedTab == 0,
+                        enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )),
+                        exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
+                    ) {
+                        AvailableCoursesSection(
+                            availableCourses, viewModel
+                        )
+                    }
+
+                    this@Column.AnimatedVisibility(
+                        visible = selectedTab == 1,
+                        enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )),
+                        exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
+                    ) {
+                        EnrolledCoursesSection(
+                            viewModel = viewModel,
+                            onCourseSelected = { courseId -> selectedCourseId = courseId }
+                        )
+                    }
                 }
             }
         }
@@ -260,7 +277,7 @@ fun AvailableCoursesSection(availableCourses: List<Course>, viewModel: MainViewM
 }
 
 @Composable
-fun EnrolledCoursesSection(viewModel: MainViewModel) {
+fun EnrolledCoursesSection(viewModel: MainViewModel, onCourseSelected: (Int) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -288,7 +305,8 @@ fun EnrolledCoursesSection(viewModel: MainViewModel) {
                     EnrolledCourseItem(
                         course = course,
                         grade = courseGrade?.grade,
-                        animationDelay = index * 100
+                        animationDelay = index * 100,
+                        onViewDetails = { onCourseSelected(course.id) }
                     )
                 }
             }
@@ -577,7 +595,12 @@ fun AvailableCourseItem(course: Course, onEnroll: () -> Unit, animationDelay: In
 }
 
 @Composable
-fun EnrolledCourseItem(course: Course, grade: Float?, animationDelay: Int) {
+fun EnrolledCourseItem(
+    course: Course,
+    grade: Float?,
+    animationDelay: Int,
+    onViewDetails: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -714,7 +737,7 @@ fun EnrolledCourseItem(course: Course, grade: Float?, animationDelay: Int) {
                             )
 
                             Text(
-                                text = grade?.let { "Оценка: $it из 5" } ?: "Оценка отсутствует",
+                                text = grade?.let { "Оценка: $it из 100" } ?: "Оценка отсутствует",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (grade != null) FontWeight.Medium else FontWeight.Normal,
                                 color = if (grade != null)
@@ -735,7 +758,7 @@ fun EnrolledCourseItem(course: Course, grade: Float?, animationDelay: Int) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
-                        onClick = { /* View course details */ },
+                        onClick = { /* View details action */ },
                         shape = RoundedCornerShape(12.dp),
                         border = ButtonDefaults.outlinedButtonBorder.copy(
                             brush = Brush.horizontalGradient(
@@ -758,7 +781,7 @@ fun EnrolledCourseItem(course: Course, grade: Float?, animationDelay: Int) {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     FilledTonalButton(
-                        onClick = { /* Start learning */ },
+                        onClick = onViewDetails,
                         colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -778,3 +801,177 @@ fun EnrolledCourseItem(course: Course, grade: Float?, animationDelay: Int) {
         }
     }
 }
+
+@Composable
+fun CourseDetails(
+    viewModel: MainViewModel,
+    courseId: Int,
+    onBack: () -> Unit
+) {
+
+    LaunchedEffect(courseId) {
+        viewModel.loadMaterials(courseId)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Back button and header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Назад",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = "Детали курса",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Course title
+        val course = viewModel.courses.value.find { it.id == courseId }
+        if (course != null) {
+            Text(
+                text = course.title,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "ID курса: ${course.id}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Materials header
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Book,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Учебные материалы",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Existing materials
+        if (viewModel.materials.value.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Материалы отсутствуют",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                itemsIndexed(viewModel.materials.value) { index, material ->
+                    val colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                        MaterialTheme.colorScheme.surface
+                    )
+
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(brush = Brush.verticalGradient(colors))
+                                .padding(16.dp)
+                        ) {
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Материал ${index + 1}",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Text(
+                                    text = material.content,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Action buttons at the bottom
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            OutlinedButton(
+                onClick = onBack,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Назад")
+            }
+        }
+    }
+}
+

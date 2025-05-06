@@ -293,6 +293,7 @@ fun StudentsTabContent(
     }
 }
 @Composable
+
 fun CourseListView(viewModel: MainViewModel, onSelectCourse: (com.example.coursemanager.data.Course) -> Unit) {
     Column(
         modifier = Modifier

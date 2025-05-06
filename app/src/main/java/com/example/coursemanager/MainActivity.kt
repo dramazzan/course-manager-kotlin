@@ -94,7 +94,8 @@ class MainActivity : ComponentActivity() {
                                 }
                             }, onChatClicked = {
                                 navController.navigate("chat")
-                            })
+                            }
+                                )
 
                             else -> {}
                         }
