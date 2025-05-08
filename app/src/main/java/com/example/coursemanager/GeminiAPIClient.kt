@@ -13,11 +13,9 @@ class GeminiAPIClient(private val apiKey: String) {
     private val client = OkHttpClient()
     private val JSON = "application/json; charset=utf-8".toMediaType()
 
-    // Функция для отправки запроса и получения ответа
     suspend fun getAssistantResponse(userInput: String): String {
         val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey"
 
-        // Формируем тело запроса согласно документации Gemini API
         val jsonBody = """
             {
               "contents": [
@@ -47,7 +45,6 @@ class GeminiAPIClient(private val apiKey: String) {
                 if (response.isSuccessful && responseBody != null) {
                     val jsonResponse = JSONObject(responseBody)
 
-                    // Корректный путь для извлечения текста ответа из Gemini API
                     if (jsonResponse.has("candidates") &&
                         jsonResponse.getJSONArray("candidates").length() > 0) {
 
@@ -75,7 +72,6 @@ class GeminiAPIClient(private val apiKey: String) {
         }
     }
 
-    // Вспомогательная функция для логирования ответов при отладке
     private fun logResponse(response: String) {
         println("API ответ: $response")
     }

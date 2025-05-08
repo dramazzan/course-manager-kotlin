@@ -36,7 +36,7 @@ import com.google.accompanist.placeholder.material.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked: () -> Unit) {
+fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked: () -> Unit , onProfile: ()-> Unit) {
     LaunchedEffect(Unit) {
         viewModel.loadAllCourses()
         viewModel.loadGrades()
@@ -79,6 +79,22 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                     }
                 },
                 actions = {
+                    // Кнопка "Профиль"
+                    IconButton(
+                        onClick = onProfile ,
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.2f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Профиль",
+                            tint = Color.White
+                        )
+                    }
+
+                    // Кнопка "Выйти"
                     IconButton(
                         onClick = onLogout,
                         modifier = Modifier
@@ -94,6 +110,7 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                     }
                 }
             )
+
         },
         floatingActionButton = {
             FloatingActionButton(

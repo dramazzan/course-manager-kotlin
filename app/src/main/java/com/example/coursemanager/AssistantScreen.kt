@@ -242,7 +242,6 @@ fun AssistantScreen(apiKey: String, onBackPressed: () -> Unit) {
                         .padding(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Исправлено: использование правильных стилей для TextField в Material3
                     TextField(
                         value = userInput,
                         onValueChange = { userInput = it },

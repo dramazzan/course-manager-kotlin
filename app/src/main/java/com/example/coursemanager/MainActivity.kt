@@ -94,6 +94,8 @@ class MainActivity : ComponentActivity() {
                                 }
                             }, onChatClicked = {
                                 navController.navigate("chat")
+                            }, onProfile = {
+                                navController.navigate("profile")
                             }
                                 )
 
@@ -109,8 +111,15 @@ class MainActivity : ComponentActivity() {
 
                         })
                     }
+                    composable ("profile"){
+                        StudentProfileScreen(viewModel = viewModel, onBackPressed = {
+                            navController.navigate("home"){
+                                popUpTo("chat"){inclusive = true}
+                            }
+                        })
+                        }
+                    }
                 }
             }
         }
     }
-}

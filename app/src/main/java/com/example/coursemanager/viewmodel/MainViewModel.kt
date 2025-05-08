@@ -111,6 +111,13 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
         loadUsers()
     }
 
+
+    fun updateUserProfile(updatedUser: User) {
+        db.userDao().updateUser(updatedUser)
+        currentUser = updatedUser
+    }
+
+
     fun loadStudentsForCourse(courseId: Int): List<User> {
         val enrollments = db.enrollmentDao().getEnrollmentsForCourse(courseId)
         return enrollments.mapNotNull { enrollment -> db.userDao().getUserById(enrollment.studentId) }
