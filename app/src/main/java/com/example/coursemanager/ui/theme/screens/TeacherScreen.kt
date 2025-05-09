@@ -41,7 +41,7 @@ import com.example.coursemanager.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit) {
+fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit, onCreateTest: (Int) -> Unit) {
     var selectedCourseId by remember { mutableStateOf<Int?>(null) }
     var materialContent by remember { mutableStateOf("") }
     val gradeInputs = remember { mutableStateMapOf<Int, String>() }
@@ -105,6 +105,9 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit) {
                     }
                 },
                 actions = {
+                    // Remove the create test button from here,
+                    // it will be added to the course detail view
+
                     IconButton(
                         onClick = onLogout,
                         modifier = Modifier
@@ -155,7 +158,7 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit) {
                     }
                 )
             } else {
-                // Course Detail Screen
+                // Course Detail Screen with tabs and now includes test creation for selected course
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -168,6 +171,39 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit) {
                             )
                         )
                 ) {
+                    // Add course actions row with Create Test button
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FilledTonalButton(
+                            onClick = {
+                                selectedCourseId?.let { courseId -> onCreateTest(courseId) }
+                            },
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = AppColors.secondary,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.height(44.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Создать тест",
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                "Создать тест",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
                     // Tabs for Materials and Students
                     TabRow(
                         selectedTabIndex = activeTabIndex,
@@ -246,7 +282,6 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit) {
         }
     }
 }
-
 @Composable
 fun StudentsTabContent(
     viewModel: MainViewModel,

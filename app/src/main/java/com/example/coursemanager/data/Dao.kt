@@ -57,6 +57,7 @@ interface EnrollmentDao {
     @Insert
     fun insert(enrollment: Enrollment)
 }
+
 @Dao
 interface MaterialDao {
     @Query("SELECT * FROM Material WHERE courseId = :courseId")
@@ -73,4 +74,55 @@ interface GradeDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(grade: Grade)
+}
+
+@Dao
+interface TestDao {
+    @Query("SELECT * FROM Test WHERE courseId = :courseId")
+    fun getTestsForCourse(courseId: Int): List<Test>
+
+    @Query("SELECT * FROM Test WHERE id = :testId LIMIT 1")
+    fun getTestById(testId: Int): Test?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(test: Test): Long
+
+    @Delete
+    fun delete(test: Test)
+}
+
+@Dao
+interface TestQuestionDao {
+    @Query("SELECT * FROM TestQuestion WHERE testId = :testId ORDER BY orderNumber ASC")
+    fun getQuestionsForTest(testId: Int): List<TestQuestion>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(question: TestQuestion)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(questions: List<TestQuestion>)
+
+    @Delete
+    fun delete(question: TestQuestion)
+
+    @Query("DELETE FROM TestQuestion WHERE testId = :testId")
+    fun deleteQuestionsForTest(testId: Int)
+}
+
+@Dao
+interface TestResultDao {
+    @Query("SELECT * FROM TestResult WHERE testId = :testId")
+    fun getResultsForTest(testId: Int): List<TestResult>
+
+    @Query("SELECT * FROM TestResult WHERE studentId = :studentId")
+    fun getResultsForStudent(studentId: Int): List<TestResult>
+
+    @Query("SELECT * FROM TestResult WHERE testId = :testId AND studentId = :studentId LIMIT 1")
+    fun getStudentResultForTest(testId: Int, studentId: Int): TestResult?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(result: TestResult)
+
+    @Delete
+    fun delete(result: TestResult)
 }

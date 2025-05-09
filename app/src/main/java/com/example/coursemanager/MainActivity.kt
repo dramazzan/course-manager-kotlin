@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
             .build()
 
         if (database.userDao().getUserByEmail("admin@example.com") == null) {
-            val admin = com.example.coursemanager.data.User(
+            val admin = User(
                 name = "Администратор",
                 email = "admin@example.com",
                 password = "adminpass",
@@ -85,9 +85,14 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("login") {
                                     popUpTo("home") { inclusive = true }
                                 }
-                            })
+                            },
+                                onCreateTest = { courseId ->
+                                    navController.navigate("createTest/${courseId}")
+                                }
+                                )
 
-                            "STUDENT" -> StudentScreen(viewModel, onLogout = {
+                            "STUDENT" -> StudentScreen(viewModel,
+                                onLogout = {
                                 currentUser = null
                                 navController.navigate("login") {
                                     popUpTo("home") { inclusive = true }
@@ -96,7 +101,10 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("chat")
                             }, onProfile = {
                                 navController.navigate("profile")
-                            }
+                            },
+                                onCourseClick = { courseId ->
+                                    navController.navigate("courseDetails/${courseId}")
+                                }
                                 )
 
                             else -> {}
@@ -118,8 +126,56 @@ class MainActivity : ComponentActivity() {
                             }
                         })
                         }
+                    composable("createTest/{courseId}") { backStackEntry ->
+                        val courseId = backStackEntry.arguments?.getString("courseId")?.toIntOrNull() ?: 0
+                        TestCreationScreen(
+                            viewModel = viewModel,
+                            courseId = courseId,
+                            onBackPressed = {
+                                navController.navigate("home") {
+                                    popUpTo("createTest") { inclusive = true }
+                                }
+                            },
+                            onTestCreated = {
+                                navController.navigate("home") {
+                                    popUpTo("createTest") { inclusive = true }
+                                }
+                            }
+                        )
                     }
+                    composable("testTaking/{testId}") { backStackEntry ->
+                        val testId = backStackEntry.arguments?.getString("testId")?.toIntOrNull() ?: 0
+                        TestTakingScreen(
+                            viewModel = viewModel,
+                            testId = testId,
+                            onBackPressed = {
+                                // Возврат на страницу с деталями курса
+                                navController.navigateUp()
+                            },
+                            onTestCompleted = {
+                                // После завершения теста возвращаемся на страницу с деталями курса
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+                    composable("courseDetails/{courseId}") { backStackEntry ->
+                        val courseId = backStackEntry.arguments?.getString("courseId")?.toIntOrNull() ?: 0
+                        CourseDetails(
+                            viewModel = viewModel,
+                            courseId = courseId,
+                            onBack = {
+                                navController.navigateUp()
+                            },
+                            onTestTaken = { testId ->
+                                navController.navigate("testTaking/${testId}")
+                            }
+                        )
+                    }
+
+
+
                 }
             }
         }
     }
+}

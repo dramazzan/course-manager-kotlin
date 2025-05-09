@@ -17,7 +17,6 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
@@ -28,15 +27,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.coursemanager.data.Course
 import com.example.coursemanager.viewmodel.MainViewModel
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked: () -> Unit , onProfile: ()-> Unit) {
+fun StudentScreen(
+    viewModel: MainViewModel,
+    onLogout: () -> Unit,
+    onChatClicked: () -> Unit,
+    onProfile: () -> Unit,
+    onCourseClick: (Int) -> Unit
+) {
     LaunchedEffect(Unit) {
         viewModel.loadAllCourses()
         viewModel.loadGrades()
@@ -48,9 +52,6 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
 
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Доступные курсы", "Мои курсы")
-
-    // State for course details navigation
-    var selectedCourseId by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(
         topBar = {
@@ -81,7 +82,7 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                 actions = {
                     // Кнопка "Профиль"
                     IconButton(
-                        onClick = onProfile ,
+                        onClick = onProfile,
                         modifier = Modifier
                             .padding(end = 8.dp)
                             .clip(CircleShape)
@@ -110,7 +111,6 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
                     }
                 }
             )
-
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -150,119 +150,109 @@ fun StudentScreen(viewModel: MainViewModel, onLogout: () -> Unit, onChatClicked:
             }
         }
     ) { paddingValues ->
-        // Show course details if a course is selected, otherwise show the main screen
-        if (selectedCourseId != null) {
-            CourseDetails(
-                viewModel = viewModel,
-                courseId = selectedCourseId!!,
-                onBack = { selectedCourseId = null }
-            )
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                AppColors.backgroundTop,
-                                AppColors.backgroundBottom
-                            )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            AppColors.backgroundTop,
+                            AppColors.backgroundBottom
                         )
                     )
+                )
+        ) {
+            // Custom Tab Row
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = Color.White,
+                contentColor = AppColors.primary,
+                divider = {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .background(Color.White)
+                    )
+                },
+                indicator = { tabPositions ->
+                    Box(
+                        Modifier
+                            .tabIndicatorOffset(tabPositions[selectedTab])
+                            .height(4.dp)
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        AppColors.primary,
+                                        AppColors.secondary
+                                    )
+                                ),
+                                shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
+                            )
+                    )
+                }
             ) {
-                // Custom Tab Row
-                TabRow(
-                    selectedTabIndex = selectedTab,
-                    containerColor = Color.White,
-                    contentColor = AppColors.primary,
-                    divider = {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(4.dp)
-                                .background(Color.White)
-                        )
-                    },
-                    indicator = { tabPositions ->
-                        Box(
-                            Modifier
-                                .tabIndicatorOffset(tabPositions[selectedTab])
-                                .height(4.dp)
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            AppColors.primary,
-                                            AppColors.secondary
-                                        )
-                                    ),
-                                    shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
-                                )
-                        )
-                    }
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        val selected = selectedTab == index
-                        Tab(
-                            selected = selected,
-                            onClick = { selectedTab = index },
-                            text = {
-                                Text(
-                                    text = title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selected) AppColors.primary else AppColors.textSecondary
-                                )
-                            },
-                            icon = {
-                                val icon = if (index == 0) Icons.Outlined.MenuBook else Icons.Default.School
-                                val tint = if (selected) AppColors.primary else AppColors.textSecondary
+                tabs.forEachIndexed { index, title ->
+                    val selected = selectedTab == index
+                    Tab(
+                        selected = selected,
+                        onClick = { selectedTab = index },
+                        text = {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                color = if (selected) AppColors.primary else AppColors.textSecondary
+                            )
+                        },
+                        icon = {
+                            val icon = if (index == 0) Icons.Outlined.MenuBook else Icons.Default.School
+                            val tint = if (selected) AppColors.primary else AppColors.textSecondary
 
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = title,
-                                    tint = tint
-                                )
-                            },
-                            modifier = Modifier.padding(vertical = 12.dp)
-                        )
-                    }
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = title,
+                                tint = tint
+                            )
+                        },
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+                }
+            }
+
+            // Content area with animated transitions
+            Box(modifier = Modifier.fillMaxSize()) {
+                this@Column.AnimatedVisibility(
+                    visible = selectedTab == 0,
+                    enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )),
+                    exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
+                ) {
+                    AvailableCoursesSection(
+                        availableCourses, viewModel
+                    )
                 }
 
-                // Content area with animated transitions
-                Box(modifier = Modifier.fillMaxSize()) {
-                    this@Column.AnimatedVisibility(
-                        visible = selectedTab == 0,
-                        enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )),
-                        exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
-                    ) {
-                        AvailableCoursesSection(
-                            availableCourses, viewModel
-                        )
-                    }
-
-                    this@Column.AnimatedVisibility(
-                        visible = selectedTab == 1,
-                        enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )),
-                        exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
-                    ) {
-                        EnrolledCoursesSection(
-                            viewModel = viewModel,
-                            onCourseSelected = { courseId -> selectedCourseId = courseId }
-                        )
-                    }
+                this@Column.AnimatedVisibility(
+                    visible = selectedTab == 1,
+                    enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )),
+                    exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
+                ) {
+                    EnrolledCoursesSection(
+                        viewModel = viewModel,
+                        onCourseSelected = { courseId -> onCourseClick(courseId) }
+                    )
                 }
             }
         }
     }
 }
-
 @Composable
 fun AvailableCoursesSection(availableCourses: List<Course>, viewModel: MainViewModel) {
     Column(
@@ -501,7 +491,7 @@ fun AvailableCourseItem(course: Course, onEnroll: () -> Unit, animationDelay: In
     var isHovered by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(animationDelay.toLong())
+        delay(animationDelay.toLong())
         expanded = true
     }
 
@@ -648,7 +638,7 @@ fun EnrolledCourseItem(
     var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(animationDelay.toLong())
+        delay(animationDelay.toLong())
         expanded = true
     }
 
@@ -866,11 +856,12 @@ fun EnrolledCourseItem(
 fun CourseDetails(
     viewModel: MainViewModel,
     courseId: Int,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onTestTaken: (Int) -> Unit
 ) {
-
     LaunchedEffect(courseId) {
         viewModel.loadMaterials(courseId)
+        viewModel.loadTests(courseId) // Load tests for the course
     }
 
     Column(
@@ -1056,37 +1047,95 @@ fun CourseDetails(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        // Tests header
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // Action buttons at the bottom
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            OutlinedButton(
-                onClick = onBack,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.height(48.dp),
-                border = ButtonDefaults.outlinedButtonBorder.copy(
-                    brush = Brush.horizontalGradient(
-                        listOf(
-                            AppColors.primary.copy(alpha = 0.5f),
-                            AppColors.primary
-                        )
-                    )
-                )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(AppColors.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.size(20.dp)
+                    imageVector = Icons.Default.Assessment,
+                    contentDescription = null,
+                    tint = AppColors.primary,
+                    modifier = Modifier.size(24.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    "Назад",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Medium
-                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Тесты",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AppColors.textPrimary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Displaying tests
+        if (viewModel.tests.value.isEmpty()) {
+            Text(
+                text = "Тесты отсутствуют",
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppColors.textSecondary
+            )
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                itemsIndexed(viewModel.tests.value) { index, test ->
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = test.title,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = AppColors.textPrimary
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Fixed: Simplify the button click handler
+                                // Исправленный обработчик в функции CourseDetails
+                                OutlinedButton(
+                                    onClick = {
+                                        // Сначала загружаем вопросы теста
+                                        viewModel.loadTestQuestions(test.id)
+                                        // Передаем корректный testId на экран тестирования
+                                        onTestTaken(test.id)
+                                    },
+                                    modifier = Modifier.align(Alignment.End)
+                                ) {
+                                    Text(
+                                        text = "Перейти к тесту",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

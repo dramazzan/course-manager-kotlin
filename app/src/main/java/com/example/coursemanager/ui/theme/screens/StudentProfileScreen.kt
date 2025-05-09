@@ -41,11 +41,9 @@ fun StudentProfileScreen(
     val currentUser = viewModel.currentUser
     var editMode by remember { mutableStateOf(false) }
 
-    // Editable user state
     var name by remember { mutableStateOf(currentUser?.name ?: "") }
     var email by remember { mutableStateOf(currentUser?.email ?: "") }
 
-    // Save status states
     var isSaving by remember { mutableStateOf(false) }
     var saveSuccess by remember { mutableStateOf(false) }
 
@@ -54,7 +52,7 @@ fun StudentProfileScreen(
 
     LaunchedEffect(editMode) {
         if (editMode) {
-            delay(100) // Small delay to ensure animation completes
+            delay(100)
             nameRequester.requestFocus()
         }
     }
@@ -128,7 +126,6 @@ fun StudentProfileScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Profile Avatar Section
             ProfileAvatar(
                 name = currentUser?.name ?: "Студент",
                 role = currentUser?.role ?: "STUDENT"
@@ -136,12 +133,10 @@ fun StudentProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Student Statistics Card
             StudentStatsCard(viewModel)
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Profile Information Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -220,7 +215,6 @@ fun StudentProfileScreen(
                         ) {
                             OutlinedButton(
                                 onClick = {
-                                    // Reset fields and cancel edit mode
                                     name = currentUser?.name ?: ""
                                     email = currentUser?.email ?: ""
                                     editMode = false
@@ -241,11 +235,9 @@ fun StudentProfileScreen(
 
                             Button(
                                 onClick = {
-                                    // Save profile information
                                     currentUser?.let { user ->
                                         isSaving = true
                                         scope.launch {
-                                            // Simulating API call delay
                                             delay(1000)
                                             viewModel.updateUserProfile(
                                                 user.copy(
@@ -255,7 +247,7 @@ fun StudentProfileScreen(
                                             )
                                             isSaving = false
                                             saveSuccess = true
-                                            delay(1500) // Show success message
+                                            delay(1500)
                                             saveSuccess = false
                                             editMode = false
                                         }
@@ -288,7 +280,6 @@ fun StudentProfileScreen(
                 }
             }
 
-            // Account Security Card
             Spacer(modifier = Modifier.height(24.dp))
 
             Card(
@@ -342,7 +333,6 @@ fun StudentProfileScreen(
             }
         }
 
-        // Success message overlay
         AnimatedVisibility(
             visible = saveSuccess,
             enter = fadeIn() + expandVertically(),
@@ -392,7 +382,6 @@ fun ProfileAvatar(name: String, role: String) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Avatar with animated gradient border
         Box(contentAlignment = Alignment.Center) {
             val infiniteTransition = rememberInfiniteTransition(label = "border")
             val rotationAnim by infiniteTransition.animateFloat(
@@ -405,7 +394,6 @@ fun ProfileAvatar(name: String, role: String) {
                 label = "rotation"
             )
 
-            // Animated gradient border
             Box(
                 modifier = Modifier
                     .size(140.dp)
@@ -423,7 +411,6 @@ fun ProfileAvatar(name: String, role: String) {
                     .rotate(rotationAnim)
             )
 
-            // Inner avatar
             Box(
                 modifier = Modifier
                     .size(130.dp)
@@ -522,7 +509,6 @@ fun StudentStatsCard(viewModel: MainViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Enrolled Courses Stat
                 StatItem(
                     value = enrolledCourses.toString(),
                     label = "Активные курсы",
@@ -530,7 +516,6 @@ fun StudentStatsCard(viewModel: MainViewModel) {
                     color = AppColors.secondary
                 )
 
-                // Divider
                 Box(
                     modifier = Modifier
                         .width(1.dp)
@@ -538,7 +523,6 @@ fun StudentStatsCard(viewModel: MainViewModel) {
                         .background(AppColors.fieldBorder)
                 )
 
-                // Completed Courses Stat
                 StatItem(
                     value = completedCourses.toString(),
                     label = "Завершено",
@@ -546,15 +530,12 @@ fun StudentStatsCard(viewModel: MainViewModel) {
                     color = Color(0xFF4CAF50)
                 )
 
-                // Divider
                 Box(
                     modifier = Modifier
                         .width(1.dp)
                         .height(80.dp)
                         .background(AppColors.fieldBorder)
                 )
-
-                // Average Grade Stat
                 StatItem(
                     value = String.format("%.1f", averageGrade),
                     label = "Ср. балл",

@@ -41,3 +41,37 @@ data class Grade(
     val courseId: Int,
     val grade: Float
 )
+
+@Entity
+data class Test(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val courseId: Int,
+    val title: String,
+    val description: String = "",
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity
+data class TestQuestion(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val testId: Int,
+    val questionText: String,
+    val optionA: String,
+    val optionB: String,
+    val optionC: String,
+    val optionD: String,
+    val correctOption: String,
+    val orderNumber: Int
+)
+
+@Entity
+data class TestResult(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val testId: Int,
+    val studentId: Int,
+    val score: Float,
+    val completedAt: Long = System.currentTimeMillis()
+)

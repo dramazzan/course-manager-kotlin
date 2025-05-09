@@ -1,5 +1,6 @@
 package com.example.coursemanager.viewmodel
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,13 +10,16 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
     var currentUser: User? = null
         private set
 
-
     var courses = mutableStateOf<List<Course>>(listOf())
-
     var allCourses = mutableStateOf<List<Course>>(listOf())
     var materials = mutableStateOf<List<Material>>(listOf())
     var grades = mutableStateOf<List<Grade>>(listOf())
     var users = mutableStateOf<List<User>>(listOf())
+    var tests = mutableStateOf<List<Test>>(listOf())
+    private var _currentTest = mutableStateOf<Test?>(null)
+//    val currentTest = _currentTest as State<Test?>)
+
+    var currentTestQuestions = mutableStateOf<List<TestQuestion>>(listOf())
 
     fun setUser(user: User) {
         currentUser = user
@@ -55,8 +59,6 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
         currentUser?.let { user ->
             if (user.role == "STUDENT") {
                 grades.value = db.gradeDao().getGradesForStudent(user.id)
-            } else {
-
             }
         }
     }
@@ -111,16 +113,49 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
         loadUsers()
     }
 
-
     fun updateUserProfile(updatedUser: User) {
         db.userDao().updateUser(updatedUser)
         currentUser = updatedUser
     }
 
-
     fun loadStudentsForCourse(courseId: Int): List<User> {
         val enrollments = db.enrollmentDao().getEnrollmentsForCourse(courseId)
         return enrollments.mapNotNull { enrollment -> db.userDao().getUserById(enrollment.studentId) }
+    }
+
+    // Методы для работы с тестами
+    fun createTest(courseId: Int, title: String, description: String, questions: List<TestQuestion>) {
+        val newTest = Test(courseId = courseId, title = title, description = description)
+        val testId = db.testDao().insert(newTest)
+        val updatedQuestions = questions.map { it.copy(testId = testId.toInt()) }
+        db.testQuestionDao().insertAll(updatedQuestions)
+    }
+
+    fun loadTestQuestions(testId: Int) {
+        currentTestQuestions.value = db.testQuestionDao().getQuestionsForTest(testId)
+    }
+
+    fun setCurrentTest(test: Test) {
+        _currentTest.value = test
+        loadTestQuestions(test.id)
+    }
+
+
+    fun loadTests(courseId: Int) {
+        tests.value = db.testDao().getTestsForCourse(courseId)
+    }
+
+    fun hasStudentTakenTest(testId: Int, studentId: Int): Boolean {
+        return db.testResultDao().getStudentResultForTest(testId, studentId) != null
+    }
+
+    fun getStudentResultForTest(testId: Int, studentId: Int): TestResult? {
+        return db.testResultDao().getStudentResultForTest(testId, studentId)
+    }
+
+    fun submitTestResult(testId: Int, studentId: Int, score: Float) {
+        val result = TestResult(testId = testId, studentId = studentId, score = score)
+        db.testResultDao().insert(result)
     }
 }
 
