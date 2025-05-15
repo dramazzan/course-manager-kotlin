@@ -49,7 +49,7 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit, onCreateTest: 
 
     // Track active tab when course is selected
     var activeTabIndex by remember { mutableStateOf(0) }
-    val courseTabs = listOf("Материалы", "Студенты")
+    val courseTabs = listOf("Материалы", "Тесты", "Студенты") // Added "Tests" tab
 
     // Selected course title
     var selectedCourseTitle by remember { mutableStateOf("") }
@@ -105,9 +105,6 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit, onCreateTest: 
                     }
                 },
                 actions = {
-                    // Remove the create test button from here,
-                    // it will be added to the course detail view
-
                     IconButton(
                         onClick = onLogout,
                         modifier = Modifier
@@ -146,6 +143,8 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit, onCreateTest: 
                         selectedCourseId = course.id
                         selectedCourseTitle = course.title
                         viewModel.loadMaterials(course.id)
+                        // Load tests for the course
+                        viewModel.loadTests(course.id)
                         enrolledStudents = viewModel.loadStudentsForCourse(course.id)
                         enrolledStudents.forEach { student ->
                             if (gradeInputs[student.id] == null) {
@@ -204,7 +203,7 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit, onCreateTest: 
                         }
                     }
 
-                    // Tabs for Materials and Students
+                    // Tabs for Materials, Tests, and Students
                     TabRow(
                         selectedTabIndex = activeTabIndex,
                         containerColor = Color.White,
@@ -248,7 +247,11 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit, onCreateTest: 
                                     )
                                 },
                                 icon = {
-                                    val icon = if (index == 0) Icons.Default.LibraryBooks else Icons.Default.Group
+                                    val icon = when (index) {
+                                        0 -> Icons.Default.LibraryBooks
+                                        1 -> Icons.Default.Assessment
+                                        else -> Icons.Default.Group
+                                    }
                                     val tint = if (selected) AppColors.primary else AppColors.textSecondary
 
                                     Icon(
@@ -270,7 +273,11 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit, onCreateTest: 
                             materialContent = materialContent,
                             onMaterialContentChange = { materialContent = it }
                         )
-                        1 -> StudentsTabContent(
+                        1 -> TestsTabContent( // New tab for tests
+                            viewModel = viewModel,
+                            courseId = selectedCourseId!!
+                        )
+                        2 -> StudentsTabContent(
                             viewModel = viewModel,
                             courseId = selectedCourseId!!,
                             students = enrolledStudents,
@@ -282,6 +289,7 @@ fun TeacherScreen(viewModel: MainViewModel, onLogout: () -> Unit, onCreateTest: 
         }
     }
 }
+
 @Composable
 fun StudentsTabContent(
     viewModel: MainViewModel,
@@ -1368,3 +1376,452 @@ fun StudentGradeCard(
     }
 }
 
+
+
+@Composable
+fun TestsTabContent(
+    viewModel: MainViewModel,
+    courseId: Int
+) {
+    // State for delete confirmation dialog
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var testToDelete by remember { mutableStateOf<Int?>(null) }
+    var testTitleToDelete by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Tests header
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(24.dp),
+                    spotColor = AppColors.primary.copy(alpha = 0.1f)
+                ),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    AppColors.primary,
+                                    AppColors.primary.copy(alpha = 0.7f)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Assessment,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column {
+                    Text(
+                        text = "Управление тестами",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = AppColors.textPrimary
+                    )
+
+                    Text(
+                        text = "Количество: ${viewModel.tests.value.size}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AppColors.textSecondary
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    AppColors.primary,
+                                    AppColors.primary.copy(alpha = 0.7f)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = viewModel.tests.value.size.toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Displaying tests
+        if (viewModel.tests.value.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color.White)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(28.dp),
+                            spotColor = AppColors.primary.copy(alpha = 0.1f)
+                        )
+                        .padding(32.dp)
+                ) {
+                    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                    val scale by infiniteTransition.animateFloat(
+                        initialValue = 0.9f,
+                        targetValue = 1.1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(1500),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "scale"
+                    )
+
+                    Icon(
+                        imageVector = Icons.Outlined.Quiz,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .scale(scale),
+                        tint = AppColors.textSecondary.copy(alpha = 0.7f)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        text = "Тесты отсутствуют",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = AppColors.textPrimary,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Создайте первый тест с помощью кнопки \"Создать тест\"",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AppColors.textSecondary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                itemsIndexed(viewModel.tests.value) { index, test ->
+                    // Animation for item appearance
+                    var expanded by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(Unit) {
+                        kotlinx.coroutines.delay(index * 100L)
+                        expanded = true
+                    }
+
+                    AnimatedVisibility(
+                        visible = expanded,
+                        enter = fadeIn(animationSpec = tween(300)) +
+                                slideInVertically(animationSpec = tween(300)) { it / 2 },
+                        exit = fadeOut(animationSpec = tween(300)) +
+                                slideOutVertically(animationSpec = tween(300)) { it / 2 }
+                    ) {
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp)
+                            ) {
+                                Column {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(40.dp)
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(AppColors.primary.copy(alpha = 0.1f)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Assignment,
+                                                    contentDescription = null,
+                                                    tint = AppColors.primary,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.width(12.dp))
+
+                                            Column {
+                                                Text(
+                                                    text = test.title,
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = AppColors.textPrimary
+                                                )
+
+                                                Text(
+                                                    text = "ID: ${test.id}",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = AppColors.textSecondary
+                                                )
+                                            }
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                testToDelete = test.id
+                                                testTitleToDelete = test.title
+                                                showDeleteDialog = true
+                                            },
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(AppColors.error.copy(alpha = 0.1f))
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Удалить тест",
+                                                tint = AppColors.error,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // Statistics about the test
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(
+                                                color = AppColors.backgroundTop.copy(alpha = 0.5f),
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                            .padding(12.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        TestStatCard(
+                                            icon = Icons.Default.QuestionAnswer,
+                                            title = "Вопросов",
+                                            value = "-" // Mock data, should come from viewModel
+                                        )
+
+                                        Divider(
+                                            modifier = Modifier
+                                                .height(36.dp)
+                                                .width(1.dp),
+                                            color = AppColors.fieldBorder
+                                        )
+
+                                        TestStatCard(
+                                            icon = Icons.Default.People,
+                                            title = "Прошли",
+                                            value = "-" // Mock data, should come from viewModel
+                                        )
+
+                                        Divider(
+                                            modifier = Modifier
+                                                .height(36.dp)
+                                                .width(1.dp),
+                                            color = AppColors.fieldBorder
+                                        )
+
+                                        TestStatCard(
+                                            icon = Icons.Default.Star,
+                                            title = "Сред. балл",
+                                            value = "-" // Mock data, should come from viewModel
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+//                                    // Action buttons
+//                                    Row(
+//                                        modifier = Modifier.fillMaxWidth(),
+//                                        horizontalArrangement = Arrangement.End,
+//                                        verticalAlignment = Alignment.CenterVertically
+//                                    ) {
+//                                        OutlinedButton(
+//                                            onClick = { /* Handle edit test */ },
+//                                            shape = RoundedCornerShape(8.dp),
+//                                            colors = ButtonDefaults.outlinedButtonColors(
+//                                                contentColor = AppColors.primary
+//                                            )
+//                                        ) {
+//                                            Icon(
+//                                                imageVector = Icons.Default.Edit,
+//                                                contentDescription = "Редактировать",
+//                                                modifier = Modifier.size(16.dp)
+//                                            )
+//                                            Spacer(modifier = Modifier.width(4.dp))
+//                                            Text(
+//                                                text = "Редактировать",
+//                                                style = MaterialTheme.typography.bodySmall
+//                                            )
+//                                        }
+//
+//                                        Spacer(modifier = Modifier.width(8.dp))
+//
+//                                        Button(
+//                                            onClick = { /* Handle preview test */ },
+//                                            shape = RoundedCornerShape(8.dp),
+//                                            colors = ButtonDefaults.buttonColors(
+//                                                containerColor = AppColors.primary
+//                                            )
+//                                        ) {
+//                                            Icon(
+//                                                imageVector = Icons.Default.Visibility,
+//                                                contentDescription = "Просмотр",
+//                                                modifier = Modifier.size(16.dp)
+//                                            )
+//                                            Spacer(modifier = Modifier.width(4.dp))
+//                                            Text(
+//                                                text = "Просмотреть",
+//                                                style = MaterialTheme.typography.bodySmall
+//                                            )
+//                                        }
+//                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Confirmation dialog for test deletion
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    testToDelete = null
+                },
+                title = {
+                    Text(
+                        "Подтверждение удаления",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        "Вы действительно хотите удалить тест \"$testTitleToDelete\"? " +
+                                "Это действие нельзя отменить.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            // Delete the test
+                            testToDelete?.let { testId ->
+                                viewModel.deleteTest(testId)
+                                // Reload tests after deletion
+                                viewModel.loadTests(courseId)
+                            }
+                            showDeleteDialog = false
+                            testToDelete = null
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AppColors.error
+                        )
+                    ) {
+                        Text("Удалить")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            testToDelete = null
+                        }
+                    ) {
+                        Text("Отмена")
+                    }
+                },
+                containerColor = Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun TestStatCard(
+    icon: ImageVector,
+    title: String,
+    value: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = AppColors.primary,
+            modifier = Modifier.size(20.dp)
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall,
+            color = AppColors.textSecondary
+        )
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = AppColors.textPrimary
+        )
+    }
+}

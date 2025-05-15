@@ -140,10 +140,19 @@ class MainViewModel(private val db: AppDatabase) : ViewModel() {
         loadTestQuestions(test.id)
     }
 
+    fun deleteTest(testId: Int) {
+        val test = db.testDao().getTestById(testId)
+        test?.let {
+            db.testDao().delete(it)
+            loadTests(it.courseId)
+        }
+    }
 
     fun loadTests(courseId: Int) {
         tests.value = db.testDao().getTestsForCourse(courseId)
     }
+
+
 
     fun hasStudentTakenTest(testId: Int, studentId: Int): Boolean {
         return db.testResultDao().getStudentResultForTest(testId, studentId) != null
