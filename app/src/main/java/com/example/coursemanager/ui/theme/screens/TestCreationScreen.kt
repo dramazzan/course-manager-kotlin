@@ -87,7 +87,6 @@ fun TestCreationScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Test information section
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,7 +103,6 @@ fun TestCreationScreen(
                         .fillMaxWidth()
                         .padding(20.dp)
                 ) {
-                    // Header with icon
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
@@ -180,7 +178,6 @@ fun TestCreationScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Questions section header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -214,7 +211,6 @@ fun TestCreationScreen(
                 }
             }
 
-            // Questions list
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -236,13 +232,11 @@ fun TestCreationScreen(
                     )
                 }
 
-                // Space at the bottom for better UX
                 item {
                     Spacer(modifier = Modifier.height(80.dp))
                 }
             }
 
-            // Create button
             Button(
                 onClick = {
                     if (isTestValid(testTitle, questions)) {
